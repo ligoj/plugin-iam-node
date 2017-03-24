@@ -1,0 +1,3 @@
+name;value
+iam.primary;service:id:ldap:dig
+iam.secondary;service:id:ldap:adu
