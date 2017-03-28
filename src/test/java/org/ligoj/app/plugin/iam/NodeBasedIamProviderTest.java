@@ -42,9 +42,8 @@ public class NodeBasedIamProviderTest extends AbstractServerTest {
 
 	@Before
 	public void prepareSubscription() throws IOException {
-		persistEntities(
-				"csv", new Class[] { SystemConfiguration.class, Node.class, Parameter.class,
-						ParameterValue.class},
+		persistEntities("csv",
+				new Class[] { SystemConfiguration.class, Node.class, Parameter.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
 	}
 
