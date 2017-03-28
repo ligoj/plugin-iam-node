@@ -1,0 +1,2 @@
+parameter.id;data;node.id
+service:id:uid-pattern;.*;service:id:ldap:dig

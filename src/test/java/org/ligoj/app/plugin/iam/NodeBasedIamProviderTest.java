@@ -11,13 +11,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamConfigurationProvider;
-import org.ligoj.app.model.DelegateNode;
-import org.ligoj.app.model.Event;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
-import org.ligoj.app.model.Project;
-import org.ligoj.app.model.Subscription;
 import org.ligoj.app.plugin.id.resource.IdentityServicePlugin;
 import org.ligoj.app.resource.AbstractServerTest;
 import org.ligoj.app.resource.ServicePluginLocator;
@@ -47,8 +43,8 @@ public class NodeBasedIamProviderTest extends AbstractServerTest {
 	@Before
 	public void prepareSubscription() throws IOException {
 		persistEntities(
-				"csv/app-test", new Class[] { SystemConfiguration.class, Node.class, Parameter.class, Project.class,
-						Subscription.class, ParameterValue.class, Event.class, DelegateNode.class },
+				"csv", new Class[] { SystemConfiguration.class, Node.class, Parameter.class,
+						ParameterValue.class},
 				StandardCharsets.UTF_8.name());
 	}
 
