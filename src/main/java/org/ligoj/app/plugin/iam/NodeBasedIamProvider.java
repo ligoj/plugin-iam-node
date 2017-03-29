@@ -3,6 +3,7 @@ package org.ligoj.app.plugin.iam;
 import javax.cache.annotation.CacheResult;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamConfigurationProvider;
 import org.ligoj.app.iam.IamProvider;
@@ -22,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Component
 @Slf4j
-public class NodeBasedIamProvider implements IamProvider {
+public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 	@Autowired
 	protected ServicePluginLocator servicePluginLocator;
@@ -76,6 +77,11 @@ public class NodeBasedIamProvider implements IamProvider {
 		final String primary = getPrimary();
 		return servicePluginLocator.getResourceExpected(primary, IamConfigurationProvider.class)
 				.getConfiguration(primary);
+	}
+
+	@Override
+	public String getKey() {
+		return "feature:iam:node";
 	}
 
 }
