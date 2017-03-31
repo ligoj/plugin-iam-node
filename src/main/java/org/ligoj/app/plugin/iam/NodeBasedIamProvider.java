@@ -1,12 +1,17 @@
 package org.ligoj.app.plugin.iam;
 
+import java.util.List;
+
 import javax.cache.annotation.CacheResult;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.api.FeaturePlugin;
+import org.ligoj.app.api.PluginException;
+import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamConfigurationProvider;
 import org.ligoj.app.iam.IamProvider;
+import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.id.resource.IdentityServicePlugin;
 import org.ligoj.app.resource.ServicePluginLocator;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
@@ -24,6 +29,15 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
+	/**
+	 * Configuration key for IAM primary node.
+	 */
+	private static final String PRIMARY_CONFIGURATION = "iam.primary";
+
+	/**
+	 * Configuration key for IAM secondary node.
+	 */
+	private static final String SECONDARY_CONFIGURATION = "iam.secondary";
 
 	@Autowired
 	protected ServicePluginLocator servicePluginLocator;
@@ -31,13 +45,16 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	@Autowired
 	protected ConfigurationResource configuration;
 
+	@Autowired
+	private NodeRepository nodeRepository;
+
 	/**
 	 * Secondary user nodes.
 	 * 
 	 * @return Secondary user nodes. May be empty.
 	 */
 	protected String[] getSecondary() {
-		return StringUtils.defaultString(configuration.get("iam.secondary"), "").split(",");
+		return StringUtils.defaultString(configuration.get(SECONDARY_CONFIGURATION), "").split(",");
 	}
 
 	/**
@@ -46,7 +63,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	 * @return Secondary user nodes. Should not be <code>null</code>.
 	 */
 	protected String getPrimary() {
-		return configuration.get("iam.primary");
+		return configuration.get(PRIMARY_CONFIGURATION);
 	}
 
 	@Override
@@ -82,6 +99,21 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	@Override
 	public String getKey() {
 		return "feature:iam:node";
+	}
+
+	@Override
+	public void install() {
+		List<Node> nodes = nodeRepository.findAllInstanceByService("service:id");
+		if (nodes.isEmpty()) {
+			// No available 'id' node
+			throw new PluginException(getKey(), "Expects at least one node implementing 'service:id'");
+		}
+
+		// At least one node found, use it as default
+		final String primary = nodes.get(0).getId();
+		log.info("{} will use {} as primary node. You can override this default choice by setting"
+				+ " -D{}='service:id:some:node'", getKey(), primary, PRIMARY_CONFIGURATION);
+		configuration.saveOrUpdate(PRIMARY_CONFIGURATION, primary);
 	}
 
 }

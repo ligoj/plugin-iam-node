@@ -9,13 +9,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ligoj.app.AbstractAppTest;
+import org.ligoj.app.api.PluginException;
 import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamConfigurationProvider;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.plugin.id.resource.IdentityServicePlugin;
-import org.ligoj.app.resource.AbstractServerTest;
 import org.ligoj.app.resource.ServicePluginLocator;
 import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
@@ -35,7 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class NodeBasedIamProviderTest extends AbstractServerTest {
+public class NodeBasedIamProviderTest extends AbstractAppTest {
 
 	@Autowired
 	private ConfigurationResource configuration;
@@ -114,5 +115,27 @@ public class NodeBasedIamProviderTest extends AbstractServerTest {
 				IamConfigurationProvider.class)).thenReturn(servicePlugin);
 
 		Assert.assertSame(iamConfiguration, provider.getConfiguration());
+	}
+
+	@Test
+	public void getKey() {
+		Assert.assertEquals("feature:iam:node", new NodeBasedIamProvider().getKey());
+	}
+
+	@Test
+	public void install() {
+		csvForJpa.cleanup(SystemConfiguration.class);
+		final NodeBasedIamProvider provider = new NodeBasedIamProvider();
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
+		provider.install();
+		Assert.assertEquals("service:id:ldap:dig", configuration.get("iam.primary"));
+	}
+
+	@Test(expected = PluginException.class)
+	public void installNoId() {
+		csvForJpa.cleanup(SystemConfiguration.class, Node.class, Parameter.class, ParameterValue.class);
+		final NodeBasedIamProvider provider = new NodeBasedIamProvider();
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
+		provider.install();
 	}
 }
