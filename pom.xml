@@ -10,7 +10,7 @@
 
 	<groupId>org.ligoj.plugin</groupId>
 	<artifactId>plugin-iam-node</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 	<name>Ligoj - Plugin IAM Node</name>
 	<description>A node based IAM provider</description>
