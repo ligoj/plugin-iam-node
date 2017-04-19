@@ -16,6 +16,7 @@ import org.ligoj.app.plugin.id.resource.IdentityServicePlugin;
 import org.ligoj.app.resource.ServicePluginLocator;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Component
 @Slf4j
+@Order(10)
 public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	/**
 	 * Configuration key for IAM primary node.
