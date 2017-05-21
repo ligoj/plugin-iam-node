@@ -14,6 +14,13 @@
 	<packaging>jar</packaging>
 	<name>Ligoj - Plugin IAM Node</name>
 	<description>A node based IAM provider</description>
+
+	<scm>
+		<connection>scm:git:https://github.com/ligoj/plugin-iam-node</connection>
+		<developerConnection>scm:git:https://github.com/ligoj/plugin-iam-node</developerConnection>
+		<url>https://github.com/ligoj/plugin-iam-node.git</url>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
