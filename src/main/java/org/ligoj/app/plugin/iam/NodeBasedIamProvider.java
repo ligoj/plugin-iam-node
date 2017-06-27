@@ -105,7 +105,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 	@Override
 	public void install() {
-		List<Node> nodes = nodeRepository.findAllInstanceByService("service:id");
+		List<Node> nodes = nodeRepository.findAllBy(" refined.refined.id", "service:id");
 		if (nodes.isEmpty()) {
 			// No available 'id' node
 			throw new PluginException(getKey(), "Expects at least one node implementing 'service:id'");
