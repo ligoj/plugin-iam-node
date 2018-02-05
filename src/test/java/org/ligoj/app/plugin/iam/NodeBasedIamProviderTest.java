@@ -48,7 +48,7 @@ public class NodeBasedIamProviderTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void authenticateNoSecondary() throws Exception {
+	public void authenticateNoSecondary() {
 		final Authentication authentication = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication authentication2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
 		final NodeBasedIamProvider provider = new NodeBasedIamProvider();
@@ -62,7 +62,7 @@ public class NodeBasedIamProviderTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void authenticateSecondaryAccept() throws Exception {
+	public void authenticateSecondaryAccept() {
 		final Authentication authentication = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication authentication2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
 		final IdentityServicePlugin servicePlugin = Mockito.mock(IdentityServicePlugin.class);
@@ -79,7 +79,7 @@ public class NodeBasedIamProviderTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void authenticateSecondaryDontAccept() throws Exception {
+	public void authenticateSecondaryDontAccept() {
 		final Authentication authentication = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication authentication2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
 		final IdentityServicePlugin servicePluginSecondary = Mockito.mock(IdentityServicePlugin.class);
