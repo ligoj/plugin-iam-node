@@ -1,6 +1,7 @@
 package org.ligoj.app.plugin.iam;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.cache.annotation.CacheResult;
 
@@ -11,6 +12,7 @@ import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamConfigurationProvider;
 import org.ligoj.app.iam.IamProvider;
+import org.ligoj.app.iam.empty.EmptyIamProvider;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.id.resource.IdentityServicePlugin;
 import org.ligoj.app.resource.ServicePluginLocator;
@@ -23,9 +25,8 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Identity and Access Management provider based on node. A primary node is used
- * to fetch user details. The secondary provider can authenticate some users
- * before the primary, when their login is accepted.
+ * Identity and Access Management provider based on node. A primary node is used to fetch user details. The secondary
+ * provider can authenticate some users before the primary, when their login is accepted.
  */
 @Component
 @Slf4j
@@ -49,6 +50,12 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 	@Autowired
 	private NodeRepository nodeRepository;
+
+	/**
+	 * The fail-safe IAM provider.
+	 */
+	@Autowired
+	private EmptyIamProvider emptyProvider;
 
 	/**
 	 * Secondary user nodes.
@@ -93,9 +100,14 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	@Override
 	@CacheResult(cacheName = "iam-node-configuration")
 	public IamConfiguration getConfiguration() {
+		// Only primary node is used for repository configuration
 		final String primary = getPrimary();
-		return servicePluginLocator.getResourceExpected(primary, IamConfigurationProvider.class)
-				.getConfiguration(primary);
+		return Optional.ofNullable(servicePluginLocator.getResource(primary, IamConfigurationProvider.class))
+				.map(p -> p.getConfiguration(primary)).orElseGet(() -> {
+					// Node or related plug-in are not available
+					log.error("Primary node {} is not available, use empty IAM", primary);
+					return emptyProvider.getConfiguration();
+				});
 	}
 
 	@Override
