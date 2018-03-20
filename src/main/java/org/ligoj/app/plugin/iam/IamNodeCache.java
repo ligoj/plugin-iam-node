@@ -1,0 +1,20 @@
+package org.ligoj.app.plugin.iam;
+
+import java.util.function.Function;
+
+import org.ligoj.bootstrap.resource.system.cache.CacheManagerAware;
+import org.springframework.stereotype.Component;
+
+import com.hazelcast.cache.HazelcastCacheManager;
+import com.hazelcast.config.CacheConfig;
+
+@Component
+public class IamNodeCache implements CacheManagerAware {
+
+	@Override
+	public void onCreate(final HazelcastCacheManager cacheManager,
+			final Function<String, CacheConfig<?, ?>> provider) {
+		cacheManager.createCache("iam-node-configuration", provider.apply("iam-node-configuration"));
+	}
+
+}

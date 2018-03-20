@@ -51,11 +51,16 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	@Autowired
 	private NodeRepository nodeRepository;
 
+	@Autowired
+	protected NodeBasedIamProvider self;
+
 	/**
 	 * The fail-safe IAM provider.
 	 */
 	@Autowired
 	private EmptyIamProvider emptyProvider;
+
+	private IamConfiguration iamConfiguration;
 
 	/**
 	 * Secondary user nodes.
@@ -98,16 +103,28 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	}
 
 	@Override
-	@CacheResult(cacheName = "iam-node-configuration")
 	public IamConfiguration getConfiguration() {
+		self.ensureCachedConfiguration();
+		return Optional.ofNullable(iamConfiguration).orElseGet(this::refreshConfiguration);
+	}
+
+	@CacheResult(cacheName = "iam-node-configuration")
+	public boolean ensureCachedConfiguration() {
+		refreshConfiguration();
+		return true;
+	}
+
+	private IamConfiguration refreshConfiguration() {
 		// Only primary node is used for repository configuration
 		final String primary = getPrimary();
-		return Optional.ofNullable(servicePluginLocator.getResource(primary, IamConfigurationProvider.class))
+		iamConfiguration = Optional
+				.ofNullable(servicePluginLocator.getResource(primary, IamConfigurationProvider.class))
 				.map(p -> p.getConfiguration(primary)).orElseGet(() -> {
 					// Node or related plug-in are not available
 					log.error("Primary node {} is not available, use empty IAM", primary);
 					return emptyProvider.getConfiguration();
 				});
+		return iamConfiguration;
 	}
 
 	@Override
