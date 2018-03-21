@@ -112,6 +112,7 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	@Test
 	public void getConfiguration() {
 		final NodeBasedIamProvider provider = new NodeBasedIamProvider();
+		provider.self = provider;
 		provider.configuration = configuration;
 		provider.servicePluginLocator = Mockito.mock(ServicePluginLocator.class);
 		final IamConfiguration iamConfiguration = Mockito.mock(IamConfiguration.class);
