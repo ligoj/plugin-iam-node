@@ -15,6 +15,10 @@
 	<name>Ligoj - Plugin IAM Node</name>
 	<description>A node based IAM provider</description>
 
+	<properties>
+		<sonar.sources>src/main/java</sonar.sources>
+	</properties>
+
 	<scm>
 		<connection>scm:git:https://github.com/ligoj/plugin-iam-node</connection>
 		<developerConnection>scm:git:https://github.com/ligoj/plugin-iam-node</developerConnection>
