@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.ligoj.app.api.PluginException;
 import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamConfigurationProvider;
 import org.ligoj.app.model.Node;
@@ -143,16 +142,15 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 		final NodeBasedIamProvider provider = new NodeBasedIamProvider();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
 		provider.install();
-		Assertions.assertEquals("service:id:ldap:dig", configuration.get("iam.primary"));
+		Assertions.assertEquals("service:id:ldap:dig", configuration.get("feature:iam:node:primary"));
 	}
 
 	@Test
-	public void installNoId() {
+	public void installNoIdFallBackToEmpty() {
 		csvForJpa.cleanup(SystemConfiguration.class, Node.class, Parameter.class, ParameterValue.class);
 		final NodeBasedIamProvider provider = new NodeBasedIamProvider();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
-		Assertions.assertThrows(PluginException.class, () -> {
-			provider.install();
-		});
+		provider.install();
+		Assertions.assertEquals("empty", configuration.get("feature:iam:node:primary"));
 	}
 }

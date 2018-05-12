@@ -3,14 +3,12 @@
  */
 package org.ligoj.app.plugin.iam;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.cache.annotation.CacheResult;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.api.FeaturePlugin;
-import org.ligoj.app.api.PluginException;
 import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamConfigurationProvider;
@@ -35,15 +33,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Order(10)
 public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
+
+	private static final String KEY = "feature:iam:node";
+
 	/**
 	 * Configuration key for IAM primary node.
 	 */
-	private static final String PRIMARY_CONFIGURATION = "iam.primary";
+	private static final String PRIMARY_CONFIGURATION = KEY + ":primary";
 
 	/**
 	 * Configuration key for IAM secondary node.
 	 */
-	private static final String SECONDARY_CONFIGURATION = "iam.secondary";
+	private static final String SECONDARY_CONFIGURATION = KEY + ":secondary";
 
 	@Autowired
 	protected ServicePluginLocator servicePluginLocator;
@@ -67,7 +68,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 	/**
 	 * Secondary user nodes.
-	 * 
+	 *
 	 * @return Secondary user nodes. May be empty.
 	 */
 	protected String[] getSecondary() {
@@ -76,7 +77,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 	/**
 	 * Secondary user nodes.
-	 * 
+	 *
 	 * @return Secondary user nodes. Should not be <code>null</code>.
 	 */
 	protected String getPrimary() {
@@ -132,22 +133,17 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 	@Override
 	public String getKey() {
-		return "feature:iam:node";
+		return KEY;
 	}
 
 	@Override
 	public void install() {
-		List<Node> nodes = nodeRepository.findAllBy(" refined.refined.id", "service:id");
-		if (nodes.isEmpty()) {
-			// No available 'id' node
-			throw new PluginException(getKey(), "Expects at least one node implementing 'service:id'");
-		}
-
-		// At least one node found, use it as default
-		final String primary = nodes.get(0).getId();
+		// Pick the first available node implementing 'service:id' if exists
+		final String primary = nodeRepository.findAllBy(" refined.refined.id", "service:id").stream().map(Node::getId)
+				.findFirst().orElse("empty");
 		log.info("{} will use {} as primary node. You can override this default choice by setting"
 				+ " -D{}='service:id:some:node'", getKey(), primary, PRIMARY_CONFIGURATION);
-		configuration.saveOrUpdate(PRIMARY_CONFIGURATION, primary);
+		configuration.put(PRIMARY_CONFIGURATION, primary);
 	}
 
 }
