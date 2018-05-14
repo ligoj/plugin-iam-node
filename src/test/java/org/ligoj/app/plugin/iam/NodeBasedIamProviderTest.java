@@ -25,6 +25,7 @@ import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.annotation.Rollback;
@@ -46,15 +47,29 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	@Autowired
 	private NodeBasedIamProvider provider;
 
+	@Autowired
+	protected CacheManager cacheManager;
+
 	@BeforeEach
 	public void prepareSubscription() throws IOException {
 		persistEntities("csv",
 				new Class[] { SystemConfiguration.class, Node.class, Parameter.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
+		cacheManager.getCache("configuration").clear();
 	}
 
 	@Test
 	public void authenticateNoSecondary() {
+		authenticateNoSecondaryInternal();
+	}
+
+	@Test
+	public void authenticateSecondaryEmptyOrNull() {
+		configuration.put("feature:iam:node:secondary", " ,,  ");
+		authenticateNoSecondaryInternal();
+	}
+
+	private void authenticateNoSecondaryInternal() {
 		final Authentication authentication = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication authentication2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
 		final NodeBasedIamProvider provider = new NodeBasedIamProvider();

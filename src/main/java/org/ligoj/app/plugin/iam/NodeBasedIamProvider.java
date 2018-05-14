@@ -3,7 +3,10 @@
  */
 package org.ligoj.app.plugin.iam;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.cache.annotation.CacheResult;
 
@@ -71,8 +74,9 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	 *
 	 * @return Secondary user nodes. May be empty.
 	 */
-	protected String[] getSecondary() {
-		return StringUtils.defaultString(configuration.get(SECONDARY_CONFIGURATION), "").split(",");
+	private List<String> getSecondary() {
+		return Arrays.stream(configuration.get(SECONDARY_CONFIGURATION, "").split(",")).filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
 	}
 
 	/**
