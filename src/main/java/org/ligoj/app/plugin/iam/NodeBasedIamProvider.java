@@ -50,7 +50,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	private static final String SECONDARY_CONFIGURATION = KEY + ":secondary";
 
 	@Autowired
-	protected ServicePluginLocator servicePluginLocator;
+	protected ServicePluginLocator locator;
 
 	@Autowired
 	protected ConfigurationResource configuration;
@@ -65,7 +65,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	 * The fail-safe IAM provider.
 	 */
 	@Autowired
-	private EmptyIamProvider emptyProvider;
+	protected EmptyIamProvider emptyProvider;
 
 	private IamConfiguration iamConfiguration;
 
@@ -80,9 +80,9 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	}
 
 	/**
-	 * Secondary user nodes.
+	 * Primary user node.
 	 *
-	 * @return Secondary user nodes. Should not be <code>null</code>.
+	 * @return Primary user node. Never <code>null</code>.
 	 */
 	protected String getPrimary() {
 		return configuration.get(PRIMARY_CONFIGURATION);
@@ -93,21 +93,23 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 		// Determine the right provider to authenticate among the IAM nodes
 		for (final String nodeId : getSecondary()) {
-			final IdentityServicePlugin resource = servicePluginLocator.getResource(nodeId,
-					IdentityServicePlugin.class);
-			if (resource == null) {
+			final IdentityServicePlugin plugin = locator.getResource(nodeId, IdentityServicePlugin.class);
+			if (plugin == null) {
 				// Ignore IAM provider not found
-				log.info("IAM node {} does not exist", nodeId);
-			} else if (resource.accept(authentication, nodeId)) {
+				log.info("Secondary IAM node {} does not exist", nodeId);
+			} else if (plugin.accept(authentication, nodeId)) {
 				// IAM provider has been found, use it for this authentication
-				return resource.authenticate(authentication, nodeId, false);
+				return plugin.authenticate(authentication, nodeId, false);
 			}
 		}
 
 		// Primary authentication
 		final String primary = getPrimary();
-		return servicePluginLocator.getResourceExpected(primary, IdentityServicePlugin.class)
-				.authenticate(authentication, primary, true);
+		return Optional.ofNullable(locator.getResource(primary, IdentityServicePlugin.class))
+				.map(p -> p.authenticate(authentication, primary, true)).orElseGet(() -> {
+					log.info("Primary IAM node {} does not exist, use empty IAM", primary);
+					return emptyProvider.authenticate(authentication);
+				});
 	}
 
 	@Override
@@ -125,14 +127,12 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	private IamConfiguration refreshConfiguration() {
 		// Only primary node is used for repository configuration
 		final String primary = getPrimary();
-		iamConfiguration = Optional
-				.ofNullable(servicePluginLocator.getResource(primary, IamConfigurationProvider.class))
+		return Optional.ofNullable(locator.getResource(primary, IamConfigurationProvider.class))
 				.map(p -> p.getConfiguration(primary)).orElseGet(() -> {
 					// Node or related plug-in are not available
-					log.error("Primary node {} is not available, use empty IAM", primary);
+					log.error("Primary IAM node {} does not exist, use empty IAM", primary);
 					return emptyProvider.getConfiguration();
 				});
-		return iamConfiguration;
 	}
 
 	@Override
