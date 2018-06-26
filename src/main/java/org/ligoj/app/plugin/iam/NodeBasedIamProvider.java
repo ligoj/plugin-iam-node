@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.cache.annotation.CacheResult;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamConfigurationProvider;
@@ -20,6 +19,7 @@ import org.ligoj.app.iam.empty.EmptyIamProvider;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.id.resource.IdentityServicePlugin;
 import org.ligoj.app.resource.ServicePluginLocator;
+import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
