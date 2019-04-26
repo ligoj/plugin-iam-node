@@ -85,7 +85,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	 * @return Primary user node. Never <code>null</code>.
 	 */
 	protected String getPrimary() {
-		return configuration.get(PRIMARY_CONFIGURATION);
+		return configuration.get(PRIMARY_CONFIGURATION, "empty");
 	}
 
 	@Override
