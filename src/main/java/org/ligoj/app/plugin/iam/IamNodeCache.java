@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import com.hazelcast.cache.HazelcastCacheManager;
 import com.hazelcast.config.CacheConfig;
 
+/**
+ * Cache management for this plug-in
+ */
 @Component
 public class IamNodeCache implements CacheManagerAware {
 
