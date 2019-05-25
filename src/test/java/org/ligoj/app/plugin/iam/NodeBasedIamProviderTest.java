@@ -39,7 +39,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class NodeBasedIamProviderTest extends AbstractJpaTest {
+class NodeBasedIamProviderTest extends AbstractJpaTest {
 
 	@Autowired
 	private ConfigurationResource configuration;
@@ -51,7 +51,7 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	protected CacheManager cacheManager;
 
 	@BeforeEach
-	public void prepareSubscription() throws IOException {
+	void prepareSubscription() throws IOException {
 		persistEntities("csv",
 				new Class[] { SystemConfiguration.class, Node.class, Parameter.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
@@ -59,12 +59,12 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void authenticateNoSecondary() {
+	void authenticateNoSecondary() {
 		authenticateNoSecondaryInternal();
 	}
 
 	@Test
-	public void authenticateSecondaryEmptyOrNull() {
+	void authenticateSecondaryEmptyOrNull() {
 		configuration.put("feature:iam:node:secondary", " ,,  ");
 		authenticateNoSecondaryInternal();
 	}
@@ -82,7 +82,7 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void authenticateNoPrimary() {
+	void authenticateNoPrimary() {
 		configuration.delete("feature:iam:node:secondary");
 		configuration.delete("feature:iam:node:primary");
 
@@ -103,7 +103,7 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void authenticateSecondaryAccept() {
+	void authenticateSecondaryAccept() {
 		final Authentication auth = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication auth2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
 		final IdentityServicePlugin servicePlugin = Mockito.mock(IdentityServicePlugin.class);
@@ -119,7 +119,7 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void authenticateSecondaryDontAccept() {
+	void authenticateSecondaryDontAccept() {
 		final Authentication auth = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication auth2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
 		final IdentityServicePlugin secondary = Mockito.mock(IdentityServicePlugin.class);
@@ -136,7 +136,7 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void getConfiguration() {
+	void getConfiguration() {
 		final NodeBasedIamProvider provider = newResource();
 		provider.locator = Mockito.mock(ServicePluginLocator.class);
 		final IamConfiguration iamConfiguration = Mockito.mock(IamConfiguration.class);
@@ -149,7 +149,7 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void getConfigurationNotExist() {
+	void getConfigurationNotExist() {
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
 		provider.configuration = configuration;
 		provider.locator = Mockito.mock(ServicePluginLocator.class);
@@ -157,12 +157,12 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void getKey() {
+	void getKey() {
 		Assertions.assertEquals("feature:iam:node", new NodeBasedIamProvider().getKey());
 	}
 
 	@Test
-	public void install() {
+	void install() {
 		csvForJpa.cleanup(SystemConfiguration.class);
 		final NodeBasedIamProvider provider = newResource();
 		provider.install();
@@ -170,7 +170,7 @@ public class NodeBasedIamProviderTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void installNoIdFallBackToEmpty() {
+	void installNoIdFallBackToEmpty() {
 		csvForJpa.cleanup(SystemConfiguration.class, Node.class, Parameter.class, ParameterValue.class);
 		final NodeBasedIamProvider provider = newResource();
 		provider.install();

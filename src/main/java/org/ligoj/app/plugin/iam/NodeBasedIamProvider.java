@@ -118,6 +118,10 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 		return Optional.ofNullable(iamConfiguration).orElseGet(this::refreshConfiguration);
 	}
 
+	/**
+	 * Ensure the configuration cache is set.
+	 * @return Ignored.
+	 */
 	@CacheResult(cacheName = "iam-node-configuration")
 	public boolean ensureCachedConfiguration() {
 		refreshConfiguration();
