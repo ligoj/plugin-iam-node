@@ -6,7 +6,6 @@ package org.ligoj.app.plugin.iam;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.cache.annotation.CacheResult;
 
@@ -76,7 +75,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	 */
 	private List<String> getSecondary() {
 		return Arrays.stream(configuration.get(SECONDARY_CONFIGURATION, "").split(",")).filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**
@@ -120,6 +119,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 	/**
 	 * Ensure the configuration cache is set.
+	 * 
 	 * @return Ignored.
 	 */
 	@CacheResult(cacheName = "iam-node-configuration")
