@@ -1,57 +1,57 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.ligoj.api</groupId>
-		<artifactId>plugin-parent</artifactId>
-		<version>3.3.0</version>
-		<relativePath />
-	</parent>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.ligoj.api</groupId>
+        <artifactId>plugin-parent</artifactId>
+        <version>3.3.1</version>
+        <relativePath/>
+    </parent>
 
-	<groupId>org.ligoj.plugin</groupId>
-	<artifactId>plugin-iam-node</artifactId>
-	<version>1.1.3-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<name>Ligoj - Plugin IAM Node</name>
-	<description>A node based IAM provider</description>
+    <groupId>org.ligoj.plugin</groupId>
+    <artifactId>plugin-iam-node</artifactId>
+    <version>1.1.3-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Ligoj - Plugin IAM Node</name>
+    <description>A node based IAM provider</description>
 
-	<properties>
-		<sonar.sources>src/main/java</sonar.sources>
-	</properties>
+    <properties>
+        <sonar.sources>src/main/java</sonar.sources>
+    </properties>
 
-	<scm>
-		<connection>scm:git:https://github.com/ligoj/plugin-iam-node</connection>
-		<developerConnection>scm:git:https://github.com/ligoj/plugin-iam-node</developerConnection>
-		<url>https://github.com/ligoj/plugin-iam-node.git</url>
-	</scm>
+    <scm>
+        <connection>scm:git:https://github.com/ligoj/plugin-iam-node</connection>
+        <developerConnection>scm:git:https://github.com/ligoj/plugin-iam-node</developerConnection>
+        <url>https://github.com/ligoj/plugin-iam-node.git</url>
+    </scm>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-id</artifactId>
-			<version>[1.4.1,1.5.0)</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.api</groupId>
-			<artifactId>plugin-iam-empty</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.api</groupId>
-			<artifactId>plugin-api-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.ligoj.plugin</groupId>
+            <artifactId>plugin-id</artifactId>
+            <version>[1.4.1,1.5.0)</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ligoj.api</groupId>
+            <artifactId>plugin-iam-empty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ligoj.api</groupId>
+            <artifactId>plugin-api-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<profiles>
-		<profile>
-			<id>github</id>
-			<distributionManagement>
-				<repository>
-					<id>github-ligoj</id>
-					<url>https://maven.pkg.github.com/ligoj/plugin-iam-node</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <id>github</id>
+            <distributionManagement>
+                <repository>
+                    <id>github-ligoj</id>
+                    <url>https://maven.pkg.github.com/ligoj/plugin-iam-node</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>
