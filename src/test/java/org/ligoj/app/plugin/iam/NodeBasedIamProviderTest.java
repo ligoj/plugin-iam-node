@@ -53,8 +53,8 @@ class NodeBasedIamProviderTest extends AbstractJpaTest {
 	@BeforeEach
 	void prepareSubscription() throws IOException {
 		persistEntities("csv",
-				new Class[] { SystemConfiguration.class, Node.class, Parameter.class, ParameterValue.class },
-				StandardCharsets.UTF_8.name());
+				new Class<?>[] { SystemConfiguration.class, Node.class, Parameter.class, ParameterValue.class },
+				StandardCharsets.UTF_8);
 		cacheManager.getCache("configuration").clear();
 	}
 
