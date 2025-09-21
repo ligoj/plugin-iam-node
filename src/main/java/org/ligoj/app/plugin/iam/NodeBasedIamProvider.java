@@ -129,7 +129,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	}
 
 	private IamConfiguration refreshConfiguration() {
-		// Only primary node is used for repository configuration
+		// Only one primary node is used for repository configuration
 		final String primary = getPrimary();
 		return Optional.ofNullable(locator.getResource(primary, IamConfigurationProvider.class))
 				.map(p -> p.getConfiguration(primary)).orElseGet(() -> {
