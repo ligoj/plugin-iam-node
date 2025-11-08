@@ -1,4 +1,4 @@
-# :link: Ligoj IAM Node based provider [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-iam-node/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-iam-node)
+# :link: Ligoj IAM Node based provider ![Maven Central](https://img.shields.io/maven-central/v/org.ligoj.plugin/plugin-iam-node)
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-iam-node&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-iam-node)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=org.ligoj.plugin:plugin-iam-node)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-iam-node)
