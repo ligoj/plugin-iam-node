@@ -3,12 +3,7 @@
  */
 package org.ligoj.app.plugin.iam;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import javax.cache.annotation.CacheResult;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.iam.IamConfiguration;
@@ -25,7 +20,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
+import javax.cache.annotation.CacheResult;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Identity and Access Management provider based on node. A primary node is used to fetch user details. The secondary
