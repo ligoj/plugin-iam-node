@@ -3,11 +3,7 @@
  */
 package org.ligoj.app.plugin.iam;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import jakarta.transaction.Transactional;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +18,6 @@ import org.ligoj.app.resource.ServicePluginLocator;
 import org.ligoj.bootstrap.AbstractJpaTest;
 import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
-import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -31,6 +26,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Test class of {@link NodeBasedIamProvider}
@@ -73,11 +73,11 @@ class NodeBasedIamProviderTest extends AbstractJpaTest {
 		final Authentication auth = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication auth2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
 		final NodeBasedIamProvider provider = newResource();
-		final IdentityServicePlugin servicePlugin = Mockito.mock(IdentityServicePlugin.class);
-		provider.locator = Mockito.mock(ServicePluginLocator.class);
-		Mockito.when(provider.locator.getResource("service:id:ldap:dig", IdentityServicePlugin.class))
+		final IdentityServicePlugin servicePlugin = mock(IdentityServicePlugin.class);
+		provider.locator = mock(ServicePluginLocator.class);
+		when(provider.locator.getResource("service:id:ldap:dig", IdentityServicePlugin.class))
 				.thenReturn(servicePlugin);
-		Mockito.when(servicePlugin.authenticate(auth, "service:id:ldap:dig", true)).thenReturn(auth2);
+		when(servicePlugin.authenticate(auth, "service:id:ldap:dig", true)).thenReturn(auth2);
 		Assertions.assertSame(auth2, provider.authenticate(auth));
 	}
 
@@ -88,7 +88,7 @@ class NodeBasedIamProviderTest extends AbstractJpaTest {
 
 		final Authentication auth = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final NodeBasedIamProvider provider = newResource();
-		provider.locator = Mockito.mock(ServicePluginLocator.class);
+		provider.locator = mock(ServicePluginLocator.class);
 
 		// Empty provider returns the same authentication
 		Assertions.assertSame(auth, provider.authenticate(auth));
@@ -106,15 +106,15 @@ class NodeBasedIamProviderTest extends AbstractJpaTest {
 	void authenticateSecondaryAccept() {
 		final Authentication auth = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication auth2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
-		final IdentityServicePlugin servicePlugin = Mockito.mock(IdentityServicePlugin.class);
+		final IdentityServicePlugin servicePlugin = mock(IdentityServicePlugin.class);
 		final NodeBasedIamProvider provider = newResource();
-		provider.locator = Mockito.mock(ServicePluginLocator.class);
-		Mockito.when(provider.locator.getResource("service:id:ldap:adu", IdentityServicePlugin.class))
+		provider.locator = mock(ServicePluginLocator.class);
+		when(provider.locator.getResource("service:id:ldap:adu", IdentityServicePlugin.class))
 				.thenReturn(servicePlugin);
-		Mockito.when(servicePlugin.accept(auth, "service:id:ldap:adu")).thenReturn(true);
-		Mockito.when(servicePlugin.authenticate(auth, "service:id:ldap:adu", false)).thenReturn(auth2);
+		when(servicePlugin.accept(auth, "service:id:ldap:adu")).thenReturn(true);
+		when(servicePlugin.authenticate(auth, "service:id:ldap:adu", false)).thenReturn(auth2);
 		Assertions.assertSame(auth2, provider.authenticate(auth));
-		Mockito.verify(provider.locator, VerificationModeFactory.times(0)).getResource("service:id:ldap:dig",
+		verify(provider.locator, VerificationModeFactory.times(0)).getResource("service:id:ldap:dig",
 				IdentityServicePlugin.class);
 	}
 
@@ -122,27 +122,27 @@ class NodeBasedIamProviderTest extends AbstractJpaTest {
 	void authenticateSecondaryDontAccept() {
 		final Authentication auth = new UsernamePasswordAuthenticationToken("user1", "secret");
 		final Authentication auth2 = new UsernamePasswordAuthenticationToken("user1v2", "secret");
-		final IdentityServicePlugin secondary = Mockito.mock(IdentityServicePlugin.class);
-		final IdentityServicePlugin primary = Mockito.mock(IdentityServicePlugin.class);
+		final IdentityServicePlugin secondary = mock(IdentityServicePlugin.class);
+		final IdentityServicePlugin primary = mock(IdentityServicePlugin.class);
 		final NodeBasedIamProvider provider = newResource();
-		provider.locator = Mockito.mock(ServicePluginLocator.class);
-		Mockito.when(provider.locator.getResource("service:id:ldap:adu", IdentityServicePlugin.class))
+		provider.locator = mock(ServicePluginLocator.class);
+		when(provider.locator.getResource("service:id:ldap:adu", IdentityServicePlugin.class))
 				.thenReturn(secondary);
-		Mockito.when(primary.authenticate(auth, "service:id:ldap:dig", true)).thenReturn(auth2);
-		Mockito.when(provider.locator.getResource("service:id:ldap:dig", IdentityServicePlugin.class))
+		when(primary.authenticate(auth, "service:id:ldap:dig", true)).thenReturn(auth2);
+		when(provider.locator.getResource("service:id:ldap:dig", IdentityServicePlugin.class))
 				.thenReturn(primary);
 		Assertions.assertSame(auth2, provider.authenticate(auth));
-		Mockito.verify(secondary, VerificationModeFactory.times(0)).authenticate(auth, "service:id:ldap:adu", false);
+		verify(secondary, VerificationModeFactory.times(0)).authenticate(auth, "service:id:ldap:adu", false);
 	}
 
 	@Test
 	void getConfiguration() {
 		final NodeBasedIamProvider provider = newResource();
-		provider.locator = Mockito.mock(ServicePluginLocator.class);
-		final IamConfiguration iamConfiguration = Mockito.mock(IamConfiguration.class);
-		final IamConfigurationProvider servicePlugin = Mockito.mock(IamConfigurationProvider.class);
-		Mockito.when(servicePlugin.getConfiguration("service:id:ldap:dig")).thenReturn(iamConfiguration);
-		Mockito.when(provider.locator.getResource("service:id:ldap:dig", IamConfigurationProvider.class))
+		provider.locator = mock(ServicePluginLocator.class);
+		final IamConfiguration iamConfiguration = mock(IamConfiguration.class);
+		final IamConfigurationProvider servicePlugin = mock(IamConfigurationProvider.class);
+		when(servicePlugin.getConfiguration("service:id:ldap:dig")).thenReturn(iamConfiguration);
+		when(provider.locator.getResource("service:id:ldap:dig", IamConfigurationProvider.class))
 				.thenReturn(servicePlugin);
 
 		Assertions.assertSame(iamConfiguration, provider.getConfiguration());
@@ -152,7 +152,7 @@ class NodeBasedIamProviderTest extends AbstractJpaTest {
 	void getConfigurationNotExist() {
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
 		provider.configuration = configuration;
-		provider.locator = Mockito.mock(ServicePluginLocator.class);
+		provider.locator = mock(ServicePluginLocator.class);
 		Assertions.assertNotNull(provider.getConfiguration());
 	}
 
