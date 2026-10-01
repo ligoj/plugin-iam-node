@@ -17,6 +17,7 @@ import org.ligoj.app.plugin.id.resource.IdentityServicePlugin;
 import org.ligoj.app.resource.ServicePluginLocator;
 import org.ligoj.bootstrap.AbstractJpaTest;
 import org.ligoj.bootstrap.model.system.SystemConfiguration;
+import org.ligoj.bootstrap.resource.system.session.SessionSettings;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -175,5 +179,58 @@ class NodeBasedIamProviderTest extends AbstractJpaTest {
 		final NodeBasedIamProvider provider = newResource();
 		provider.install();
 		Assertions.assertEquals("empty", configuration.get("feature:iam:node:primary"));
+	}
+
+	private Object decorate() {
+		final var settings = new SessionSettings();
+		settings.setUserSettings(new HashMap<>());
+		final NodeBasedIamProvider provider = newResource();
+		provider.locator = mock(ServicePluginLocator.class);
+		when(provider.locator.getResource("service:id:ldap:dig", IamConfigurationProvider.class)).thenReturn(mock(IamConfigurationProvider.class));
+		provider.decorate(settings);
+		return settings.getUserSettings().get("warnings");
+	}
+
+	/**
+	 * Without primary node, the empty IAM accepts any credentials: the administrators are warned.
+	 */
+	@Test
+	void decorateNoPrimary() {
+		configuration.delete("feature:iam:node:primary");
+		initSpringSecurityContextAdmin(DEFAULT_USER);
+		Assertions.assertEquals(List.of(Map.of("code", "iam-node-no-primary", "parameters", Map.of())), decorate());
+	}
+
+	@Test
+	void decoratePrimaryEmpty() {
+		configuration.put("feature:iam:node:primary", "empty");
+		initSpringSecurityContextAdmin(DEFAULT_USER);
+		Assertions.assertEquals(List.of(Map.of("code", "iam-node-no-primary", "parameters", Map.of())), decorate());
+	}
+
+	/**
+	 * The primary node does not resolve to an IAM plug-in: same fall back.
+	 */
+	@Test
+	void decoratePrimaryNotFound() {
+		configuration.put("feature:iam:node:primary", "service:id:ldap:any");
+		initSpringSecurityContextAdmin(DEFAULT_USER);
+		Assertions.assertEquals(List.of(Map.of("code", "iam-node-primary-not-found", "parameters", Map.of("primary", "service:id:ldap:any"))),
+				decorate());
+	}
+
+	@Test
+	void decoratePrimary() {
+		initSpringSecurityContextAdmin(DEFAULT_USER);
+		Assertions.assertNull(decorate());
+	}
+
+	/**
+	 * A regular user cannot fix the configuration: the risk is not disclosed to him.
+	 */
+	@Test
+	void decorateNoPrimaryNotAdmin() {
+		configuration.delete("feature:iam:node:primary");
+		Assertions.assertNull(decorate());
 	}
 }

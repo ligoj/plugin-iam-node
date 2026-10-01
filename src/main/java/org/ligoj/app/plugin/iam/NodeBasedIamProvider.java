@@ -14,25 +14,32 @@ import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.id.resource.IdentityServicePlugin;
 import org.ligoj.app.resource.ServicePluginLocator;
 import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
+import org.ligoj.bootstrap.core.security.SecurityHelper;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
+import org.ligoj.bootstrap.resource.system.session.ISessionSettingsProvider;
+import org.ligoj.bootstrap.resource.system.session.SessionSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.cache.annotation.CacheResult;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
  * Identity and Access Management provider based on node. A primary node is used to fetch user details. The secondary
- * provider can authenticate some users before the primary, when their login is accepted.
+ * provider can authenticate some users before the primary, when their login is accepted.<br>
+ * Without a usable primary node, the fail-safe empty IAM is used: it accepts any credentials, and the administrators
+ * are warned through the session settings (see {@link #decorate(SessionSettings)}).
  */
 @Component
 @Slf4j
 @Order(10)
-public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
+public class NodeBasedIamProvider implements IamProvider, FeaturePlugin, ISessionSettingsProvider {
 
 	private static final String KEY = "feature:iam:node";
 
@@ -46,6 +53,17 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	 */
 	private static final String SECONDARY_CONFIGURATION = KEY + ":secondary";
 
+	/**
+	 * Primary node value selecting the fail-safe empty IAM.
+	 */
+	private static final String EMPTY_PRIMARY = "empty";
+
+	/**
+	 * User settings entry holding the session warnings: a list of <code>{code, parameters}</code> displayed by the UI
+	 * with the <code>warning.&lt;code&gt;</code> message.
+	 */
+	static final String WARNINGS = "warnings";
+
 	@Autowired
 	protected ServicePluginLocator locator;
 
@@ -54,6 +72,9 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 
 	@Autowired
 	private NodeRepository nodeRepository;
+
+	@Autowired
+	private SecurityHelper securityHelper;
 
 	@Autowired
 	protected NodeBasedIamProvider self;
@@ -82,7 +103,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 	 * @return Primary user node. Never <code>null</code>.
 	 */
 	protected String getPrimary() {
-		return configuration.get(PRIMARY_CONFIGURATION, "empty");
+		return configuration.get(PRIMARY_CONFIGURATION, EMPTY_PRIMARY);
 	}
 
 	@Override
@@ -135,6 +156,30 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin {
 					log.error("Primary IAM node '{}' does not exist, use empty IAM", primary);
 					return emptyProvider.getConfiguration();
 				});
+	}
+
+	/**
+	 * Warn the administrators when the primary node is not usable: undefined, explicitly {@value #EMPTY_PRIMARY}, or not
+	 * resolved to an IAM plug-in. The fail-safe empty IAM is then used, accepting any login and password. The regular
+	 * users are not told: they cannot fix it.
+	 */
+	@Override
+	public void decorate(final SessionSettings settings) {
+		if (!securityHelper.isAdmin()) {
+			return;
+		}
+		final var primary = StringUtils.trimToNull(configuration.get(PRIMARY_CONFIGURATION));
+		if (primary == null || EMPTY_PRIMARY.equals(primary)) {
+			addWarning(settings, "iam-node-no-primary", Map.of());
+		} else if (locator.getResource(primary, IamConfigurationProvider.class) == null) {
+			addWarning(settings, "iam-node-primary-not-found", Map.of("primary", primary));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addWarning(final SessionSettings settings, final String code, final Map<String, String> parameters) {
+		((List<Object>) settings.getUserSettings().computeIfAbsent(WARNINGS, k -> new ArrayList<>()))
+				.add(Map.of("code", code, "parameters", parameters));
 	}
 
 	@Override
