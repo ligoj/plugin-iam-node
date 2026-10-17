@@ -24,11 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.cache.annotation.CacheResult;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Identity and Access Management provider based on node. A primary node is used to fetch user details. The secondary
@@ -178,7 +174,7 @@ public class NodeBasedIamProvider implements IamProvider, FeaturePlugin, ISessio
 
 	@SuppressWarnings("unchecked")
 	private void addWarning(final SessionSettings settings, final String code, final Map<String, String> parameters) {
-		((List<Object>) settings.getUserSettings().computeIfAbsent(WARNINGS, k -> new ArrayList<>()))
+		((Collection<Object>) settings.getUserSettings().computeIfAbsent(WARNINGS, k -> new ArrayList<>()))
 				.add(Map.of("code", code, "parameters", parameters));
 	}
 
